@@ -149,6 +149,7 @@
         
         .input-group {
             margin-bottom: 16px;
+            position: relative;
         }
         
         label {
@@ -181,6 +182,41 @@
             resize: vertical;
         }
         
+        .voice-btn {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            width: 36px;
+            height: 36px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--accent);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .voice-btn:active {
+            background: var(--accent);
+            color: #000;
+        }
+        
+        .voice-btn.recording {
+            animation: pulse 1.5s infinite;
+            background: var(--danger);
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+        }
+        
         .btn {
             width: 100%;
             padding: 14px;
@@ -205,11 +241,20 @@
             color: white;
         }
         
+        .btn.small {
+            padding: 8px 16px;
+            font-size: 13px;
+            width: auto;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
         .meeting-item, .observation-item, .task-item {
             padding: 16px;
             border-bottom: 1px solid var(--border);
             cursor: pointer;
             transition: background 0.2s;
+            position: relative;
         }
         
         .meeting-item:last-child, .observation-item:last-child, .task-item:last-child {
@@ -218,6 +263,40 @@
         
         .meeting-item:active, .observation-item:active, .task-item:active {
             background: var(--surface-2);
+        }
+        
+        .item-actions {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            gap: 8px;
+        }
+        
+        .meeting-item:hover .item-actions,
+        .observation-item:hover .item-actions,
+        .task-item:hover .item-actions {
+            display: flex;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-2);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: var(--accent);
+            color: #000;
         }
         
         .meeting-time {
@@ -231,6 +310,7 @@
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 4px;
+            padding-right: 80px;
         }
         
         .meeting-contact {
@@ -395,7 +475,6 @@
             margin-top: 4px;
         }
         
-        /* Task specific styles */
         .task-checkbox {
             width: 20px;
             height: 20px;
@@ -570,6 +649,14 @@
             border-radius: 4px;
             margin-left: 8px;
         }
+        
+        .edit-hint {
+            font-size: 11px;
+            color: var(--text-2);
+            text-align: center;
+            margin-top: 8px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -586,7 +673,6 @@
         <button class="nav-btn" onclick="showSection('comms')">Comms</button>
     </div>
     
-    <!-- Dashboard/Mission Control Section -->
     <div id="dashboard" class="section active">
         <div class="stats-grid">
             <div class="stat-box">
@@ -608,9 +694,7 @@
                 <span class="card-title">Primary Objectives</span>
                 <span class="badge">14 Days</span>
             </div>
-            <div id="goals-container">
-                <!-- Goals injected here -->
-            </div>
+            <div id="goals-container"></div>
         </div>
         
         <h3 style="margin: 24px 0 12px; font-size: 14px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px;">Today's Priority Tasks</h3>
@@ -627,6 +711,7 @@
                 <div>No tasks for today</div>
             </div>
         </div>
+        <p class="edit-hint">Tap task to toggle complete • Swipe or tap edit to modify</p>
         
         <button class="btn" onclick="openModal('task-modal')" style="margin-top: 12px;">+ Add Task</button>
         
@@ -650,7 +735,6 @@
         </div>
     </div>
     
-    <!-- Schedule Section -->
     <div id="schedule" class="section">
         <div class="card">
             <div class="card-header">
@@ -671,9 +755,9 @@
         </div>
     </div>
     
-    <!-- Meetings Section -->
     <div id="meetings" class="section">
         <button class="btn" onclick="openModal('meeting-modal')">+ New Meeting</button>
+        <p class="edit-hint" style="margin-top: 8px;">Tap meeting to view • Tap ✎ to edit</p>
         <div id="meetings-list" style="margin-top: 16px;">
             <div class="empty-state">
                 <div class="empty-state-icon">🤝</div>
@@ -682,9 +766,9 @@
         </div>
     </div>
     
-    <!-- Observations Section -->
     <div id="observations" class="section">
         <button class="btn" onclick="openModal('obs-modal')">+ New Observation</button>
+        <p class="edit-hint" style="margin-top: 8px;">Tap observation to view • Tap ✎ to edit</p>
         <div id="obs-list" style="margin-top: 16px;">
             <div class="empty-state">
                 <div class="empty-state-icon">📝</div>
@@ -693,7 +777,6 @@
         </div>
     </div>
     
-    <!-- Comms Section -->
     <div id="comms" class="section">
         <div class="card">
             <div class="card-header">
@@ -742,11 +825,10 @@
         </div>
     </div>
     
-    <!-- Task Modal -->
     <div id="task-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add Task</h2>
+                <h2 id="task-modal-title">Add Task</h2>
                 <button class="close-btn" onclick="closeModal('task-modal')">×</button>
             </div>
             
@@ -789,19 +871,22 @@
             
             <div class="input-group">
                 <label>Notes</label>
-                <textarea id="t-notes" placeholder="Additional context..."></textarea>
+                <div style="position: relative;">
+                    <textarea id="t-notes" placeholder="Additional context..."></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('t-notes')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <button class="btn" onclick="saveTask()">Save Task</button>
             <button class="btn secondary" onclick="closeModal('task-modal')">Cancel</button>
+            <button class="btn danger" id="t-delete-btn" style="display: none;" onclick="deleteTask()">Delete Task</button>
         </div>
     </div>
     
-    <!-- Goal Modal -->
     <div id="goal-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add Mission Goal</h2>
+                <h2 id="goal-modal-title">Add Mission Goal</h2>
                 <button class="close-btn" onclick="closeModal('goal-modal')">×</button>
             </div>
             
@@ -812,7 +897,10 @@
             
             <div class="input-group">
                 <label>Description</label>
-                <textarea id="g-desc" placeholder="What does success look like?"></textarea>
+                <div style="position: relative;">
+                    <textarea id="g-desc" placeholder="What does success look like?"></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('g-desc')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <div class="input-group">
@@ -822,20 +910,23 @@
             
             <div class="input-group">
                 <label>Success Criteria (checklist items)</label>
-                <input type="text" id="g-criteria" placeholder="e.g., Meeting confirmed, Presentation delivered, Follow-up scheduled">
+                <div style="position: relative;">
+                    <textarea id="g-criteria" placeholder="e.g., Meeting confirmed, Presentation delivered, Follow-up scheduled"></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('g-criteria')" title="Voice input">🎤</button>
+                </div>
                 <small style="color: var(--text-2); font-size: 11px;">Separate items with commas</small>
             </div>
             
             <button class="btn" onclick="saveGoal()">Save Goal</button>
             <button class="btn secondary" onclick="closeModal('goal-modal')">Cancel</button>
+            <button class="btn danger" id="g-delete-btn" style="display: none;" onclick="deleteGoal()">Delete Goal</button>
         </div>
     </div>
     
-    <!-- Meeting Modal -->
     <div id="meeting-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Log Meeting</h2>
+                <h2 id="meeting-modal-title">Log Meeting</h2>
                 <button class="close-btn" onclick="closeModal('meeting-modal')">×</button>
             </div>
             
@@ -879,12 +970,18 @@
             
             <div class="input-group">
                 <label>Key Discussion Points</label>
-                <textarea id="m-notes" placeholder="What was discussed? Pain points mentioned?"></textarea>
+                <div style="position: relative;">
+                    <textarea id="m-notes" placeholder="What was discussed? Pain points mentioned?"></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('m-notes')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <div class="input-group">
                 <label>Opportunity Identified</label>
-                <textarea id="m-opp" placeholder="Specific business opportunity or gap noted..."></textarea>
+                <div style="position: relative;">
+                    <textarea id="m-opp" placeholder="Specific business opportunity or gap noted..."></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('m-opp')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <div class="input-group">
@@ -901,19 +998,22 @@
             
             <div class="input-group">
                 <label>Next Actions</label>
-                <input type="text" id="m-actions" placeholder="Who to contact, what to send, etc.">
+                <div style="position: relative;">
+                    <textarea id="m-actions" placeholder="Who to contact, what to send, etc."></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('m-actions')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <button class="btn" onclick="saveMeeting()">Save Meeting</button>
             <button class="btn secondary" onclick="closeModal('meeting-modal')">Cancel</button>
+            <button class="btn danger" id="m-delete-btn" style="display: none;" onclick="deleteMeeting()">Delete Meeting</button>
         </div>
     </div>
     
-    <!-- Observation Modal -->
     <div id="obs-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Quick Observation</h2>
+                <h2 id="obs-modal-title">Quick Observation</h2>
                 <button class="close-btn" onclick="closeModal('obs-modal')">×</button>
             </div>
             
@@ -929,32 +1029,43 @@
             
             <div class="input-group">
                 <label>Observation</label>
-                <textarea id="obs-text" placeholder="What did you notice? Be specific."></textarea>
+                <div style="position: relative;">
+                    <textarea id="obs-text" placeholder="What did you notice? Be specific."></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('obs-text')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <div class="input-group">
                 <label>Context</label>
-                <input type="text" id="obs-context" placeholder="Where/When did you observe this?">
+                <div style="position: relative;">
+                    <textarea id="obs-context" placeholder="Where/When did you observe this?"></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('obs-context')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <div class="input-group">
                 <label>Potential Solution (if applicable)</label>
-                <textarea id="obs-solution" placeholder="How might this be fixed?"></textarea>
+                <div style="position: relative;">
+                    <textarea id="obs-solution" placeholder="How might this be fixed?"></textarea>
+                    <button class="voice-btn" onclick="startVoiceInput('obs-solution')" title="Voice input">🎤</button>
+                </div>
             </div>
             
             <button class="btn" onclick="saveObservation()">Save Observation</button>
             <button class="btn secondary" onclick="closeModal('obs-modal')">Cancel</button>
+            <button class="btn danger" id="obs-delete-btn" style="display: none;" onclick="deleteObservation()">Delete Observation</button>
         </div>
     </div>
     
     <script>
-        // Data storage
         let meetings = JSON.parse(localStorage.getItem('dubai_meetings') || '[]');
         let observations = JSON.parse(localStorage.getItem('dubai_observations') || '[]');
         let tasks = JSON.parse(localStorage.getItem('dubai_tasks') || '[]');
         let goals = JSON.parse(localStorage.getItem('dubai_goals') || '[]');
         
-        // Default mission goals if none exist
+        let editingId = null;
+        let editingType = null;
+        
         const defaultGoals = [
             {
                 id: 'g1',
@@ -982,11 +1093,9 @@
             }
         ];
         
-        // Init
         document.addEventListener('DOMContentLoaded', () => {
             updateDate();
             
-            // Load default goals if empty
             if (goals.length === 0) {
                 goals = defaultGoals;
                 localStorage.setItem('dubai_goals', JSON.stringify(goals));
@@ -999,7 +1108,6 @@
             updateStats();
             populateMeetingSelect();
             
-            // Set default dates
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('m-time').value = now.toISOString().slice(0,16);
@@ -1019,45 +1127,139 @@
             event.target.classList.add('active');
         }
         
-        function openModal(id) {
+        function openModal(id, editId = null) {
+            editingId = editId;
+            editingType = id.replace('-modal', '');
+            
             document.getElementById(id).classList.add('active');
             document.body.style.overflow = 'hidden';
-            if (id === 'task-modal') populateMeetingSelect();
+            
+            if (id === 'task-modal') {
+                populateMeetingSelect();
+                if (editId) loadTaskForEdit(editId);
+                else resetTaskForm();
+            } else if (id === 'meeting-modal') {
+                if (editId) loadMeetingForEdit(editId);
+                else resetMeetingForm();
+            } else if (id === 'obs-modal') {
+                if (editId) loadObsForEdit(editId);
+                else resetObsForm();
+            } else if (id === 'goal-modal') {
+                if (editId) loadGoalForEdit(editId);
+                else resetGoalForm();
+            }
         }
         
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
             document.body.style.overflow = '';
+            editingId = null;
+            editingType = null;
         }
         
         function toggleTag(el) {
             el.classList.toggle('selected');
         }
         
-        // Task Management
+        // Voice Input
+        function startVoiceInput(targetId) {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Voice input not supported on this device. Use keyboard.');
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            const btn = event.target;
+            const textarea = document.getElementById(targetId);
+            
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-GB';
+            
+            btn.classList.add('recording');
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                const currentVal = textarea.value;
+                textarea.value = currentVal ? currentVal + ' ' + transcript : transcript;
+                btn.classList.remove('recording');
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Voice error:', event.error);
+                btn.classList.remove('recording');
+                alert('Voice capture failed. Try again or type manually.');
+            };
+            
+            recognition.onend = () => {
+                btn.classList.remove('recording');
+            };
+            
+            recognition.start();
+        }
+        
+        // Task Functions
+        function resetTaskForm() {
+            document.getElementById('task-modal-title').textContent = 'Add Task';
+            document.getElementById('t-delete-btn').style.display = 'none';
+            document.querySelectorAll('#task-modal input, #task-modal textarea').forEach(i => i.value = '');
+            document.getElementById('t-priority').value = 'medium';
+        }
+        
+        function loadTaskForEdit(id) {
+            const t = tasks.find(x => x.id == id);
+            if (!t) return;
+            
+            document.getElementById('task-modal-title').textContent = 'Edit Task';
+            document.getElementById('t-delete-btn').style.display = 'block';
+            document.getElementById('t-title').value = t.title;
+            document.getElementById('t-meeting').value = t.meetingId || '';
+            document.getElementById('t-priority').value = t.priority;
+            document.getElementById('t-category').value = t.category;
+            document.getElementById('t-due').value = t.due;
+            document.getElementById('t-notes').value = t.notes || '';
+        }
+        
         function saveTask() {
-            const task = {
-                id: Date.now(),
+            const taskData = {
                 title: document.getElementById('t-title').value,
                 meetingId: document.getElementById('t-meeting').value,
                 priority: document.getElementById('t-priority').value,
                 category: document.getElementById('t-category').value,
                 due: document.getElementById('t-due').value,
                 notes: document.getElementById('t-notes').value,
-                completed: false,
-                created: new Date().toISOString()
             };
             
-            if (!task.title) {
+            if (!taskData.title) {
                 alert('Task description required');
                 return;
             }
             
-            tasks.push(task);
-            localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
+            if (editingId) {
+                const idx = tasks.findIndex(t => t.id == editingId);
+                if (idx > -1) {
+                    tasks[idx] = { ...tasks[idx], ...taskData };
+                }
+            } else {
+                taskData.id = Date.now();
+                taskData.completed = false;
+                taskData.created = new Date().toISOString();
+                tasks.push(taskData);
+            }
             
-            document.querySelectorAll('#task-modal input, #task-modal textarea').forEach(i => i.value = '');
-            document.getElementById('t-priority').value = 'medium';
+            localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
+            closeModal('task-modal');
+            renderTasks();
+            updateStats();
+        }
+        
+        function deleteTask() {
+            if (!editingId) return;
+            if (!confirm('Delete this task?')) return;
+            
+            tasks = tasks.filter(t => t.id != editingId);
+            localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
             closeModal('task-modal');
             renderTasks();
             updateStats();
@@ -1081,7 +1283,6 @@
             else if (filter === 'meeting') filtered = tasks.filter(t => t.category === 'meeting');
             else if (filter === 'research') filtered = tasks.filter(t => t.category === 'research');
             
-            // Sort: incomplete first, then by due date
             filtered.sort((a, b) => {
                 if (a.completed !== b.completed) return a.completed ? 1 : -1;
                 return new Date(a.due) - new Date(b.due);
@@ -1103,7 +1304,7 @@
                 const priorityClass = `priority-${t.priority}`;
                 
                 return `
-                    <div class="task-item" style="display: flex; align-items: center;">
+                    <div class="task-item">
                         <div class="task-checkbox ${t.completed ? 'checked' : ''}" onclick="event.stopPropagation(); toggleTask(${t.id})"></div>
                         <div class="task-content" onclick="toggleTask(${t.id})">
                             <div class="task-title ${t.completed ? 'completed' : ''}">
@@ -1116,6 +1317,9 @@
                                 ${meeting ? `• From: ${meeting.name}` : ''}
                                 ${t.due ? `• Due: ${new Date(t.due).toLocaleDateString('en-GB')}` : ''}
                             </div>
+                        </div>
+                        <div class="item-actions" style="display: flex;">
+                            <button class="action-btn" onclick="event.stopPropagation(); openModal('task-modal', ${t.id})">✎</button>
                         </div>
                     </div>
                 `;
@@ -1130,28 +1334,63 @@
             renderTasks(type);
         }
         
-        // Goal Management
+        // Goal Functions
+        function resetGoalForm() {
+            document.getElementById('goal-modal-title').textContent = 'Add Mission Goal';
+            document.getElementById('g-delete-btn').style.display = 'none';
+            document.querySelectorAll('#goal-modal input, #goal-modal textarea').forEach(i => i.value = '');
+        }
+        
+        function loadGoalForEdit(id) {
+            const g = goals.find(x => x.id == id);
+            if (!g) return;
+            
+            document.getElementById('goal-modal-title').textContent = 'Edit Goal';
+            document.getElementById('g-delete-btn').style.display = 'block';
+            document.getElementById('g-title').value = g.title;
+            document.getElementById('g-desc').value = g.description;
+            document.getElementById('g-target').value = g.target;
+            document.getElementById('g-criteria').value = g.criteria.join(', ');
+        }
+        
         function saveGoal() {
             const criteria = document.getElementById('g-criteria').value.split(',').map(c => c.trim()).filter(c => c);
             
-            const goal = {
-                id: Date.now(),
+            const goalData = {
                 title: document.getElementById('g-title').value,
                 description: document.getElementById('g-desc').value,
                 target: document.getElementById('g-target').value,
                 criteria: criteria,
-                completed: []
             };
             
-            if (!goal.title) {
+            if (!goalData.title) {
                 alert('Goal title required');
                 return;
             }
             
-            goals.push(goal);
-            localStorage.setItem('dubai_goals', JSON.stringify(goals));
+            if (editingId) {
+                const idx = goals.findIndex(g => g.id == editingId);
+                if (idx > -1) {
+                    goals[idx] = { ...goals[idx], ...goalData };
+                }
+            } else {
+                goalData.id = Date.now();
+                goalData.completed = [];
+                goals.push(goalData);
+            }
             
-            document.querySelectorAll('#goal-modal input, #goal-modal textarea').forEach(i => i.value = '');
+            localStorage.setItem('dubai_goals', JSON.stringify(goals));
+            closeModal('goal-modal');
+            renderGoals();
+            updateStats();
+        }
+        
+        function deleteGoal() {
+            if (!editingId) return;
+            if (!confirm('Delete this goal?')) return;
+            
+            goals = goals.filter(g => g.id != editingId);
+            localStorage.setItem('dubai_goals', JSON.stringify(goals));
             closeModal('goal-modal');
             renderGoals();
             updateStats();
@@ -1176,14 +1415,17 @@
                                     ${done}/${total} completed • Due ${new Date(g.target).toLocaleDateString('en-GB')}
                                 </div>
                             </div>
-                            <div class="progress-ring">
-                                <svg width="40" height="40">
-                                    <circle class="progress-ring-bg" cx="20" cy="20" r="16"></circle>
-                                    <circle class="progress-ring-fill" cx="20" cy="20" r="16" 
-                                        stroke-dasharray="100.5" 
-                                        stroke-dashoffset="${100.5 - (100.5 * pct / 100)}"></circle>
-                                </svg>
-                                <div class="progress-text">${pct}%</div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button class="action-btn" onclick="event.stopPropagation(); openModal('goal-modal', ${g.id})">✎</button>
+                                <div class="progress-ring">
+                                    <svg width="40" height="40">
+                                        <circle class="progress-ring-bg" cx="20" cy="20" r="16"></circle>
+                                        <circle class="progress-ring-fill" cx="20" cy="20" r="16" 
+                                            stroke-dasharray="100.5" 
+                                            stroke-dashoffset="${100.5 - (100.5 * pct / 100)}"></circle>
+                                    </svg>
+                                    <div class="progress-text">${pct}%</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1238,14 +1480,45 @@
             renderGoals();
             updateStats();
             
-            // Re-render the modal content
             toggleGoalCriteria(goalId);
         }
         
-        // Meeting Management
+        // Meeting Functions
+        function resetMeetingForm() {
+            document.getElementById('meeting-modal-title').textContent = 'Log Meeting';
+            document.getElementById('m-delete-btn').style.display = 'none';
+            document.querySelectorAll('#meeting-modal input, #meeting-modal textarea').forEach(i => i.value = '');
+            document.querySelectorAll('#meeting-modal .tag').forEach(t => t.classList.remove('selected'));
+            
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('m-time').value = now.toISOString().slice(0,16);
+        }
+        
+        function loadMeetingForEdit(id) {
+            const m = meetings.find(x => x.id == id);
+            if (!m) return;
+            
+            document.getElementById('meeting-modal-title').textContent = 'Edit Meeting';
+            document.getElementById('m-delete-btn').style.display = 'block';
+            document.getElementById('m-name').value = m.name;
+            document.getElementById('m-org').value = m.org || '';
+            document.getElementById('m-email').value = m.email || '';
+            document.getElementById('m-time').value = m.time;
+            document.getElementById('m-location').value = m.location || '';
+            document.getElementById('m-type').value = m.type;
+            document.getElementById('m-notes').value = m.notes || '';
+            document.getElementById('m-opp').value = m.opportunity || '';
+            document.getElementById('m-actions').value = m.actions || '';
+            
+            document.querySelectorAll('#meeting-modal .tag').forEach(t => {
+                if (m.tags && m.tags.includes(t.textContent)) t.classList.add('selected');
+                else t.classList.remove('selected');
+            });
+        }
+        
         function saveMeeting() {
-            const meeting = {
-                id: Date.now(),
+            const meetingData = {
                 name: document.getElementById('m-name').value,
                 org: document.getElementById('m-org').value,
                 email: document.getElementById('m-email').value,
@@ -1256,38 +1529,55 @@
                 opportunity: document.getElementById('m-opp').value,
                 actions: document.getElementById('m-actions').value,
                 tags: Array.from(document.querySelectorAll('#meeting-modal .tag.selected')).map(t => t.textContent),
-                created: new Date().toISOString()
             };
             
-            if (!meeting.name || !meeting.time) {
+            if (!meetingData.name || !meetingData.time) {
                 alert('Name and time are required');
                 return;
             }
             
-            meetings.push(meeting);
-            meetings.sort((a,b) => new Date(a.time) - new Date(b.time));
-            localStorage.setItem('dubai_meetings', JSON.stringify(meetings));
-            
-            // Auto-create task for next actions if specified
-            if (meeting.actions) {
-                const task = {
-                    id: Date.now() + 1,
-                    title: `Follow-up: ${meeting.actions.substring(0, 50)}${meeting.actions.length > 50 ? '...' : ''}`,
-                    meetingId: meeting.id,
-                    priority: 'high',
-                    category: 'followup',
-                    due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    notes: `From meeting with ${meeting.name}: ${meeting.actions}`,
-                    completed: false,
-                    created: new Date().toISOString()
-                };
-                tasks.push(task);
-                localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
-                renderTasks();
+            if (editingId) {
+                const idx = meetings.findIndex(m => m.id == editingId);
+                if (idx > -1) {
+                    meetings[idx] = { ...meetings[idx], ...meetingData };
+                }
+            } else {
+                meetingData.id = Date.now();
+                meetingData.created = new Date().toISOString();
+                meetings.push(meetingData);
+                
+                if (meetingData.actions) {
+                    const task = {
+                        id: Date.now() + 1,
+                        title: `Follow-up: ${meetingData.actions.substring(0, 50)}${meetingData.actions.length > 50 ? '...' : ''}`,
+                        meetingId: meetingData.id,
+                        priority: 'high',
+                        category: 'followup',
+                        due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        notes: `From meeting with ${meetingData.name}: ${meetingData.actions}`,
+                        completed: false,
+                        created: new Date().toISOString()
+                    };
+                    tasks.push(task);
+                    localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
+                    renderTasks();
+                }
             }
             
-            document.querySelectorAll('#meeting-modal input, #meeting-modal textarea').forEach(i => i.value = '');
-            document.querySelectorAll('#meeting-modal .tag').forEach(t => t.classList.remove('selected'));
+            meetings.sort((a,b) => new Date(a.time) - new Date(b.time));
+            localStorage.setItem('dubai_meetings', JSON.stringify(meetings));
+            closeModal('meeting-modal');
+            renderMeetings();
+            updateStats();
+            populateMeetingSelect();
+        }
+        
+        function deleteMeeting() {
+            if (!editingId) return;
+            if (!confirm('Delete this meeting? Associated tasks will remain.')) return;
+            
+            meetings = meetings.filter(m => m.id != editingId);
+            localStorage.setItem('dubai_meetings', JSON.stringify(meetings));
             closeModal('meeting-modal');
             renderMeetings();
             updateStats();
@@ -1296,15 +1586,25 @@
         
         function populateMeetingSelect() {
             const select = document.getElementById('t-meeting');
+            const currentVal = select.value;
             select.innerHTML = '<option value="">-- Standalone Task --</option>' + 
                 meetings.map(m => `<option value="${m.id}">${m.name} (${m.org || 'No org'})</option>`).join('');
+            select.value = currentVal;
         }
         
         function renderMeetings() {
             const list = document.getElementById('meetings-list');
             const upcoming = document.getElementById('upcoming-list');
             
-            if (meetings.length === 0) return;
+            if (meetings.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🤝</div>
+                        <div>No meetings logged yet</div>
+                    </div>
+                `;
+                return;
+            }
             
             const html = meetings.map(m => {
                 const date = new Date(m.time);
@@ -1317,6 +1617,9 @@
                         <div class="meeting-title">${m.name} ${m.org ? `— ${m.org}` : ''}</div>
                         <div class="meeting-contact">${m.type} ${m.location ? `• ${m.location}` : ''}</div>
                         ${m.opportunity ? '<span style="color: var(--accent); font-size: 11px; margin-top: 4px; display: block;">💡 Opportunity noted</span>' : ''}
+                        <div class="item-actions">
+                            <button class="action-btn" onclick="event.stopPropagation(); openModal('meeting-modal', ${m.id})">✎</button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1335,29 +1638,72 @@
                         </div>
                     `;
                 }).join('');
+            } else {
+                upcoming.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <div>No upcoming meetings</div>
+                    </div>
+                `;
             }
         }
         
-        // Observation Management
+        // Observation Functions
+        function resetObsForm() {
+            document.getElementById('obs-modal-title').textContent = 'Quick Observation';
+            document.getElementById('obs-delete-btn').style.display = 'none';
+            document.querySelectorAll('#obs-modal input, #obs-modal textarea').forEach(i => i.value = '');
+            document.getElementById('obs-category').value = 'pain';
+        }
+        
+        function loadObsForEdit(id) {
+            const o = observations.find(x => x.id == id);
+            if (!o) return;
+            
+            document.getElementById('obs-modal-title').textContent = 'Edit Observation';
+            document.getElementById('obs-delete-btn').style.display = 'block';
+            document.getElementById('obs-category').value = o.category;
+            document.getElementById('obs-text').value = o.text;
+            document.getElementById('obs-context').value = o.context || '';
+            document.getElementById('obs-solution').value = o.solution || '';
+        }
+        
         function saveObservation() {
-            const obs = {
-                id: Date.now(),
+            const obsData = {
                 category: document.getElementById('obs-category').value,
                 text: document.getElementById('obs-text').value,
                 context: document.getElementById('obs-context').value,
                 solution: document.getElementById('obs-solution').value,
-                created: new Date().toISOString()
             };
             
-            if (!obs.text) {
+            if (!obsData.text) {
                 alert('Observation text is required');
                 return;
             }
             
-            observations.push(obs);
-            localStorage.setItem('dubai_observations', JSON.stringify(observations));
+            if (editingId) {
+                const idx = observations.findIndex(o => o.id == editingId);
+                if (idx > -1) {
+                    observations[idx] = { ...observations[idx], ...obsData };
+                }
+            } else {
+                obsData.id = Date.now();
+                obsData.created = new Date().toISOString();
+                observations.push(obsData);
+            }
             
-            document.querySelectorAll('#obs-modal input, #obs-modal textarea').forEach(i => i.value = '');
+            localStorage.setItem('dubai_observations', JSON.stringify(observations));
+            closeModal('obs-modal');
+            renderObservations();
+            updateStats();
+        }
+        
+        function deleteObservation() {
+            if (!editingId) return;
+            if (!confirm('Delete this observation?')) return;
+            
+            observations = observations.filter(o => o.id != editingId);
+            localStorage.setItem('dubai_observations', JSON.stringify(observations));
             closeModal('obs-modal');
             renderObservations();
             updateStats();
@@ -1365,7 +1711,15 @@
         
         function renderObservations() {
             const list = document.getElementById('obs-list');
-            if (observations.length === 0) return;
+            if (observations.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>No observations recorded</div>
+                    </div>
+                `;
+                return;
+            }
             
             const html = observations.map(o => {
                 const badge = o.category === 'pain' ? '<span class="badge pain">Pain Point</span>' : 
@@ -1373,10 +1727,13 @@
                              '<span class="badge">Insight</span>';
                 
                 return `
-                    <div class="observation-item">
+                    <div class="observation-item" onclick="openModal('obs-modal', ${o.id})">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             ${badge}
-                            <span style="font-size: 11px; color: var(--text-2);">${new Date(o.created).toLocaleDateString('en-GB')}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 11px; color: var(--text-2);">${new Date(o.created).toLocaleDateString('en-GB')}</span>
+                                <button class="action-btn" onclick="event.stopPropagation(); openModal('obs-modal', ${o.id})">✎</button>
+                            </div>
                         </div>
                         <div style="font-size: 15px; margin-bottom: 8px; line-height: 1.5;">${o.text}</div>
                         ${o.context ? `<div style="font-size: 13px; color: var(--text-2); margin-bottom: 8px;">Context: ${o.context}</div>` : ''}
@@ -1487,7 +1844,6 @@ Tags: ${m.tags.join(', ') || 'None'}
             alert('Full mission data exported. Email this file to yourself as backup.');
         }
         
-        // Close modals on outside click
         document.querySelectorAll('.modal').forEach(m => {
             m.addEventListener('click', (e) => {
                 if (e.target === m) closeModal(m.id);
