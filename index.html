@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>Dubai R&D Mission Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-2: #1a1a1a;
+            --text: #e6e6e6;
+            --text-2: #888;
+            --accent: #00d4aa;
+            --accent-dim: #00d4aa20;
+            --border: #2a2a2a;
+            --danger: #ff4444;
+            --warning: #ffaa00;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: var(--surface);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        
+        .header .subtitle {
+            font-size: 12px;
+            color: var(--text-2);
+            margin-top: 4px;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .nav::-webkit-scrollbar { display: none; }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-2);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn.active {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .section {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+        
+        .badge.opportunity {
+            background: rgba(0, 212, 170, 0.15);
+            color: #00d4aa;
+        }
+        
+        .badge.pain {
+            background: rgba(255, 68, 68, 0.15);
+            color: #ff4444;
+        }
+        
+        .badge.warning {
+            background: rgba(255, 170, 0, 0.15);
+            color: #ffaa00;
+        }
+        
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-2);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 15px;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        
+        .btn.secondary {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn.danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .meeting-item, .observation-item, .task-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .meeting-item:last-child, .observation-item:last-child, .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .meeting-item:active, .observation-item:active, .task-item:active {
+            background: var(--surface-2);
+        }
+        
+        .meeting-time {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .meeting-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .meeting-contact {
+            font-size: 13px;
+            color: var(--text-2);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-2);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .quick-btn {
+            padding: 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-btn:active {
+            transform: scale(0.98);
+            background: var(--surface);
+        }
+        
+        .quick-btn-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .quick-btn-text {
+            font-size: 13px;
+            color: var(--text-2);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 200;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-content {
+            background: var(--surface);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tag-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        
+        .tag {
+            padding: 6px 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .tag.selected {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+        
+        .email-template {
+            background: var(--surface-2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .email-template h4 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+        
+        .email-template p {
+            font-size: 13px;
+            color: var(--text-2);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-2);
+            margin-top: 4px;
+        }
+        
+        /* Task specific styles */
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            margin-right: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .task-checkbox.checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .task-checkbox.checked::after {
+            content: '✓';
+            color: #000;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .task-title.completed {
+            text-decoration: line-through;
+            color: var(--text-2);
+        }
+        
+        .task-meta {
+            font-size: 12px;
+            color: var(--text-2);
+        }
+        
+        .task-priority {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .priority-high {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+        
+        .priority-medium {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+        
+        .priority-low {
+            background: rgba(0, 212, 170, 0.2);
+            color: #00d4aa;
+        }
+        
+        .goal-card {
+            background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .goal-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+        
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .goal-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .goal-desc {
+            font-size: 13px;
+            color: var(--text-2);
+            line-height: 1.4;
+        }
+        
+        .progress-ring {
+            width: 40px;
+            height: 40px;
+            position: relative;
+        }
+        
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-bg {
+            fill: none;
+            stroke: var(--surface-2);
+            stroke-width: 3;
+        }
+        
+        .progress-ring-fill {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        
+        .filter-tab {
+            padding: 8px 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .filter-tab.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+        
+        .overdue-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dubai R&D Mission</h1>
+        <div class="subtitle" id="current-date">Loading...</div>
+    </div>
+    
+    <div class="nav">
+        <button class="nav-btn active" onclick="showSection('dashboard')">Mission</button>
+        <button class="nav-btn" onclick="showSection('schedule')">Schedule</button>
+        <button class="nav-btn" onclick="showSection('meetings')">Meetings</button>
+        <button class="nav-btn" onclick="showSection('observations')">Notes</button>
+        <button class="nav-btn" onclick="showSection('comms')">Comms</button>
+    </div>
+    
+    <!-- Dashboard/Mission Control Section -->
+    <div id="dashboard" class="section active">
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number" id="goal-progress">0%</div>
+                <div class="stat-label">Mission Progress</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="open-tasks">0</div>
+                <div class="stat-label">Open Tasks</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="completed-tasks">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Primary Objectives</span>
+                <span class="badge">14 Days</span>
+            </div>
+            <div id="goals-container">
+                <!-- Goals injected here -->
+            </div>
+        </div>
+        
+        <h3 style="margin: 24px 0 12px; font-size: 14px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px;">Today's Priority Tasks</h3>
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterTasks('all')">All</button>
+            <button class="filter-tab" onclick="filterTasks('high')">High Priority</button>
+            <button class="filter-tab" onclick="filterTasks('meeting')">Meetings</button>
+            <button class="filter-tab" onclick="filterTasks('research')">Research</button>
+        </div>
+        
+        <div id="priority-tasks" class="card" style="padding: 0;">
+            <div class="empty-state">
+                <div class="empty-state-icon">🎯</div>
+                <div>No tasks for today</div>
+            </div>
+        </div>
+        
+        <button class="btn" onclick="openModal('task-modal')" style="margin-top: 12px;">+ Add Task</button>
+        
+        <div class="quick-actions" style="margin-top: 20px;">
+            <div class="quick-btn" onclick="openModal('goal-modal')">
+                <div class="quick-btn-icon">🎯</div>
+                <div class="quick-btn-text">New Goal</div>
+            </div>
+            <div class="quick-btn" onclick="showSection('schedule')">
+                <div class="quick-btn-icon">📅</div>
+                <div class="quick-btn-text">Schedule</div>
+            </div>
+            <div class="quick-btn" onclick="showSection('meetings')">
+                <div class="quick-btn-icon">🤝</div>
+                <div class="quick-btn-text">Meetings</div>
+            </div>
+            <div class="quick-btn" onclick="exportData()">
+                <div class="quick-btn-icon">↓</div>
+                <div class="quick-btn-text">Export</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Schedule Section -->
+    <div id="schedule" class="section">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Today's Focus</span>
+                <span class="badge">Active</span>
+            </div>
+            <p style="color: var(--text-2); font-size: 14px; line-height: 1.6;">
+                Mission: Map tokenization infrastructure gaps. Target: Regulatory friction, custody solutions, secondary market liquidity.
+            </p>
+        </div>
+        
+        <h3 style="margin: 24px 0 12px; font-size: 14px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px;">Upcoming</h3>
+        <div id="upcoming-list" class="card" style="padding: 0;">
+            <div class="empty-state">
+                <div class="empty-state-icon">📅</div>
+                <div>No meetings scheduled</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Meetings Section -->
+    <div id="meetings" class="section">
+        <button class="btn" onclick="openModal('meeting-modal')">+ New Meeting</button>
+        <div id="meetings-list" style="margin-top: 16px;">
+            <div class="empty-state">
+                <div class="empty-state-icon">🤝</div>
+                <div>No meetings logged yet</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Observations Section -->
+    <div id="observations" class="section">
+        <button class="btn" onclick="openModal('obs-modal')">+ New Observation</button>
+        <div id="obs-list" style="margin-top: 16px;">
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <div>No observations recorded</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Comms Section -->
+    <div id="comms" class="section">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Email Templates</span>
+            </div>
+            <p style="color: var(--text-2); font-size: 13px; margin-bottom: 16px;">
+                Generates email drafts in your default mail app. Edit before sending.
+            </p>
+            
+            <div class="email-template">
+                <h4>Initial Outreach</h4>
+                <p>Pre-meeting introduction and context setting for Dubai R&D mission.</p>
+                <button class="btn secondary" onclick="generateEmail('intro')">Generate Draft</button>
+            </div>
+            
+            <div class="email-template">
+                <h4>Post-Meeting Follow-Up</h4>
+                <p>Thank you + summary of discussed opportunities and next steps.</p>
+                <button class="btn secondary" onclick="generateEmail('followup')">Generate Draft</button>
+            </div>
+            
+            <div class="email-template">
+                <h4>Information Request</h4>
+                <p>Specific data or introduction request following initial meeting.</p>
+                <button class="btn secondary" onclick="generateEmail('request')">Generate Draft</button>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 12px;">
+            <div class="card-header">
+                <span class="card-title">Custom Email</span>
+            </div>
+            <div class="input-group">
+                <label>To</label>
+                <input type="email" id="custom-email" placeholder="contact@example.com">
+            </div>
+            <div class="input-group">
+                <label>Subject</label>
+                <input type="text" id="custom-subject" placeholder="Meeting follow-up">
+            </div>
+            <div class="input-group">
+                <label>Message</label>
+                <textarea id="custom-body" placeholder="Enter your message..."></textarea>
+            </div>
+            <button class="btn" onclick="sendCustomEmail()">Open Email App</button>
+        </div>
+    </div>
+    
+    <!-- Task Modal -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Task</h2>
+                <button class="close-btn" onclick="closeModal('task-modal')">×</button>
+            </div>
+            
+            <div class="input-group">
+                <label>Task Description</label>
+                <input type="text" id="t-title" placeholder="What needs to be done?">
+            </div>
+            
+            <div class="input-group">
+                <label>Linked to Meeting (optional)</label>
+                <select id="t-meeting">
+                    <option value="">-- Standalone Task --</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Priority</label>
+                <select id="t-priority">
+                    <option value="high">High - Critical for mission</option>
+                    <option value="medium" selected>Medium - Important</option>
+                    <option value="low">Low - If time permits</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Category</label>
+                <select id="t-category">
+                    <option value="meeting">Meeting/Introduction</option>
+                    <option value="research">Research/Analysis</option>
+                    <option value="documentation">Documentation</option>
+                    <option value="followup">Follow-up Action</option>
+                    <option value="logistics">Logistics/Travel</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Due Date</label>
+                <input type="date" id="t-due">
+            </div>
+            
+            <div class="input-group">
+                <label>Notes</label>
+                <textarea id="t-notes" placeholder="Additional context..."></textarea>
+            </div>
+            
+            <button class="btn" onclick="saveTask()">Save Task</button>
+            <button class="btn secondary" onclick="closeModal('task-modal')">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Goal Modal -->
+    <div id="goal-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Mission Goal</h2>
+                <button class="close-btn" onclick="closeModal('goal-modal')">×</button>
+            </div>
+            
+            <div class="input-group">
+                <label>Goal Title</label>
+                <input type="text" id="g-title" placeholder="e.g., Secure VARA Meeting">
+            </div>
+            
+            <div class="input-group">
+                <label>Description</label>
+                <textarea id="g-desc" placeholder="What does success look like?"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label>Target Completion</label>
+                <input type="date" id="g-target">
+            </div>
+            
+            <div class="input-group">
+                <label>Success Criteria (checklist items)</label>
+                <input type="text" id="g-criteria" placeholder="e.g., Meeting confirmed, Presentation delivered, Follow-up scheduled">
+                <small style="color: var(--text-2); font-size: 11px;">Separate items with commas</small>
+            </div>
+            
+            <button class="btn" onclick="saveGoal()">Save Goal</button>
+            <button class="btn secondary" onclick="closeModal('goal-modal')">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Meeting Modal -->
+    <div id="meeting-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Log Meeting</h2>
+                <button class="close-btn" onclick="closeModal('meeting-modal')">×</button>
+            </div>
+            
+            <div class="input-group">
+                <label>Contact Name</label>
+                <input type="text" id="m-name" placeholder="Full name">
+            </div>
+            
+            <div class="input-group">
+                <label>Organisation</label>
+                <input type="text" id="m-org" placeholder="Company or entity">
+            </div>
+            
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="m-email" placeholder="email@domain.com">
+            </div>
+            
+            <div class="input-group">
+                <label>Date & Time</label>
+                <input type="datetime-local" id="m-time">
+            </div>
+            
+            <div class="input-group">
+                <label>Location</label>
+                <input type="text" id="m-location" placeholder="Address or venue">
+            </div>
+            
+            <div class="input-group">
+                <label>Type</label>
+                <select id="m-type">
+                    <option value="regulatory">Regulatory/Authority</option>
+                    <option value="platform">Tokenization Platform</option>
+                    <option value="developer">Property Developer</option>
+                    <option value="investor">Investor/Fund</option>
+                    <option value="tech">Tech Infrastructure</option>
+                    <option value="legal">Legal/Advisory</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Key Discussion Points</label>
+                <textarea id="m-notes" placeholder="What was discussed? Pain points mentioned?"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label>Opportunity Identified</label>
+                <textarea id="m-opp" placeholder="Specific business opportunity or gap noted..."></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label>Tags</label>
+                <div class="tag-selector">
+                    <span class="tag" onclick="toggleTag(this)">Tokenization</span>
+                    <span class="tag" onclick="toggleTag(this)">Regulation</span>
+                    <span class="tag" onclick="toggleTag(this)">Custody</span>
+                    <span class="tag" onclick="toggleTag(this)">Secondary Market</span>
+                    <span class="tag" onclick="toggleTag(this)">Construction</span>
+                    <span class="tag" onclick="toggleTag(this)">Follow-up Required</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Next Actions</label>
+                <input type="text" id="m-actions" placeholder="Who to contact, what to send, etc.">
+            </div>
+            
+            <button class="btn" onclick="saveMeeting()">Save Meeting</button>
+            <button class="btn secondary" onclick="closeModal('meeting-modal')">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Observation Modal -->
+    <div id="obs-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Quick Observation</h2>
+                <button class="close-btn" onclick="closeModal('obs-modal')">×</button>
+            </div>
+            
+            <div class="input-group">
+                <label>Category</label>
+                <select id="obs-category">
+                    <option value="pain">Pain Point / Problem</option>
+                    <option value="opportunity">Opportunity / Gap</option>
+                    <option value="insight">Market Insight</option>
+                    <option value="contact">Lead / Contact</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Observation</label>
+                <textarea id="obs-text" placeholder="What did you notice? Be specific."></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label>Context</label>
+                <input type="text" id="obs-context" placeholder="Where/When did you observe this?">
+            </div>
+            
+            <div class="input-group">
+                <label>Potential Solution (if applicable)</label>
+                <textarea id="obs-solution" placeholder="How might this be fixed?"></textarea>
+            </div>
+            
+            <button class="btn" onclick="saveObservation()">Save Observation</button>
+            <button class="btn secondary" onclick="closeModal('obs-modal')">Cancel</button>
+        </div>
+    </div>
+    
+    <script>
+        // Data storage
+        let meetings = JSON.parse(localStorage.getItem('dubai_meetings') || '[]');
+        let observations = JSON.parse(localStorage.getItem('dubai_observations') || '[]');
+        let tasks = JSON.parse(localStorage.getItem('dubai_tasks') || '[]');
+        let goals = JSON.parse(localStorage.getItem('dubai_goals') || '[]');
+        
+        // Default mission goals if none exist
+        const defaultGoals = [
+            {
+                id: 'g1',
+                title: 'Map Regulatory Landscape',
+                description: 'Understand VARA, DLD, SCA, and free zone jurisdictions. Identify friction points in multi-authority clearance.',
+                target: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                criteria: ['Meet VARA representative', 'Document DLD tokenization requirements', 'Map SCA securities overlap', 'Identify licensing bottlenecks'],
+                completed: []
+            },
+            {
+                id: 'g2',
+                title: 'Validate Market Infrastructure',
+                description: 'Assess custody solutions, secondary market liquidity, and platform operational readiness.',
+                target: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                criteria: ['Demo live tokenization platform', 'Interview custody provider', 'Test secondary market resale process', 'Review smart contract audit reports'],
+                completed: []
+            },
+            {
+                id: 'g3',
+                title: 'Identify Investment Gaps',
+                description: 'Find structural opportunities in construction delays, foreign investor lockout, and valuation standardisation.',
+                target: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                criteria: ['Quantify construction delay costs', 'Map foreign investor workaround structures', 'Assess AI valuation tool accuracy', 'Identify 3 viable entry points'],
+                completed: []
+            }
+        ];
+        
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDate();
+            
+            // Load default goals if empty
+            if (goals.length === 0) {
+                goals = defaultGoals;
+                localStorage.setItem('dubai_goals', JSON.stringify(goals));
+            }
+            
+            renderGoals();
+            renderTasks();
+            renderMeetings();
+            renderObservations();
+            updateStats();
+            populateMeetingSelect();
+            
+            // Set default dates
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('m-time').value = now.toISOString().slice(0,16);
+            document.getElementById('t-due').value = now.toISOString().split('T')[0];
+            document.getElementById('g-target').value = now.toISOString().split('T')[0];
+        });
+        
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Dubai' };
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB', options) + ' (Dubai Time)';
+        }
+        
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (id === 'task-modal') populateMeetingSelect();
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        function toggleTag(el) {
+            el.classList.toggle('selected');
+        }
+        
+        // Task Management
+        function saveTask() {
+            const task = {
+                id: Date.now(),
+                title: document.getElementById('t-title').value,
+                meetingId: document.getElementById('t-meeting').value,
+                priority: document.getElementById('t-priority').value,
+                category: document.getElementById('t-category').value,
+                due: document.getElementById('t-due').value,
+                notes: document.getElementById('t-notes').value,
+                completed: false,
+                created: new Date().toISOString()
+            };
+            
+            if (!task.title) {
+                alert('Task description required');
+                return;
+            }
+            
+            tasks.push(task);
+            localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
+            
+            document.querySelectorAll('#task-modal input, #task-modal textarea').forEach(i => i.value = '');
+            document.getElementById('t-priority').value = 'medium';
+            closeModal('task-modal');
+            renderTasks();
+            updateStats();
+        }
+        
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id == id);
+            if (task) {
+                task.completed = !task.completed;
+                localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
+                renderTasks();
+                updateStats();
+            }
+        }
+        
+        function renderTasks(filter = 'all') {
+            const container = document.getElementById('priority-tasks');
+            let filtered = tasks;
+            
+            if (filter === 'high') filtered = tasks.filter(t => t.priority === 'high');
+            else if (filter === 'meeting') filtered = tasks.filter(t => t.category === 'meeting');
+            else if (filter === 'research') filtered = tasks.filter(t => t.category === 'research');
+            
+            // Sort: incomplete first, then by due date
+            filtered.sort((a, b) => {
+                if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                return new Date(a.due) - new Date(b.due);
+            });
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎯</div>
+                        <div>No tasks found</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = filtered.map(t => {
+                const meeting = t.meetingId ? meetings.find(m => m.id == t.meetingId) : null;
+                const isOverdue = !t.completed && new Date(t.due) < new Date().setHours(0,0,0,0);
+                const priorityClass = `priority-${t.priority}`;
+                
+                return `
+                    <div class="task-item" style="display: flex; align-items: center;">
+                        <div class="task-checkbox ${t.completed ? 'checked' : ''}" onclick="event.stopPropagation(); toggleTask(${t.id})"></div>
+                        <div class="task-content" onclick="toggleTask(${t.id})">
+                            <div class="task-title ${t.completed ? 'completed' : ''}">
+                                ${t.title}
+                                ${isOverdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+                            </div>
+                            <div class="task-meta">
+                                <span class="task-priority ${priorityClass}">${t.priority}</span>
+                                ${t.category ? `• ${t.category}` : ''}
+                                ${meeting ? `• From: ${meeting.name}` : ''}
+                                ${t.due ? `• Due: ${new Date(t.due).toLocaleDateString('en-GB')}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function filterTasks(type) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderTasks(type);
+        }
+        
+        // Goal Management
+        function saveGoal() {
+            const criteria = document.getElementById('g-criteria').value.split(',').map(c => c.trim()).filter(c => c);
+            
+            const goal = {
+                id: Date.now(),
+                title: document.getElementById('g-title').value,
+                description: document.getElementById('g-desc').value,
+                target: document.getElementById('g-target').value,
+                criteria: criteria,
+                completed: []
+            };
+            
+            if (!goal.title) {
+                alert('Goal title required');
+                return;
+            }
+            
+            goals.push(goal);
+            localStorage.setItem('dubai_goals', JSON.stringify(goals));
+            
+            document.querySelectorAll('#goal-modal input, #goal-modal textarea').forEach(i => i.value = '');
+            closeModal('goal-modal');
+            renderGoals();
+            updateStats();
+        }
+        
+        function renderGoals() {
+            const container = document.getElementById('goals-container');
+            
+            const html = goals.map(g => {
+                const total = g.criteria.length;
+                const done = g.completed ? g.completed.length : 0;
+                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                
+                return `
+                    <div class="goal-card" onclick="toggleGoalCriteria(${g.id})">
+                        <div class="goal-progress" style="width: ${pct}%"></div>
+                        <div class="goal-header">
+                            <div>
+                                <div class="goal-title">${g.title}</div>
+                                <div class="goal-desc">${g.description}</div>
+                                <div style="margin-top: 8px; font-size: 12px; color: var(--text-2);">
+                                    ${done}/${total} completed • Due ${new Date(g.target).toLocaleDateString('en-GB')}
+                                </div>
+                            </div>
+                            <div class="progress-ring">
+                                <svg width="40" height="40">
+                                    <circle class="progress-ring-bg" cx="20" cy="20" r="16"></circle>
+                                    <circle class="progress-ring-fill" cx="20" cy="20" r="16" 
+                                        stroke-dasharray="100.5" 
+                                        stroke-dashoffset="${100.5 - (100.5 * pct / 100)}"></circle>
+                                </svg>
+                                <div class="progress-text">${pct}%</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function toggleGoalCriteria(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (!goal || !goal.criteria.length) return;
+            
+            const checks = goal.criteria.map((c, i) => {
+                const isDone = goal.completed && goal.completed.includes(i);
+                return `<div style="margin: 8px 0;">
+                    <label style="display: flex; align-items: center; cursor: pointer; text-transform: none; font-size: 14px;">
+                        <div class="task-checkbox ${isDone ? 'checked' : ''}" style="margin-right: 8px;" 
+                            onclick="event.stopPropagation(); updateGoalProgress(${goalId}, ${i})"></div>
+                        ${c}
+                    </label>
+                </div>`;
+            }).join('');
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>${goal.title}</h2>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">×</button>
+                    </div>
+                    <p style="color: var(--text-2); margin-bottom: 16px;">Check off completed criteria:</p>
+                    ${checks}
+                    <button class="btn" onclick="this.closest('.modal').remove()" style="margin-top: 16px;">Done</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function updateGoalProgress(goalId, criteriaIndex) {
+            const goal = goals.find(g => g.id === goalId);
+            if (!goal) return;
+            
+            if (!goal.completed) goal.completed = [];
+            
+            const idx = goal.completed.indexOf(criteriaIndex);
+            if (idx > -1) goal.completed.splice(idx, 1);
+            else goal.completed.push(criteriaIndex);
+            
+            localStorage.setItem('dubai_goals', JSON.stringify(goals));
+            renderGoals();
+            updateStats();
+            
+            // Re-render the modal content
+            toggleGoalCriteria(goalId);
+        }
+        
+        // Meeting Management
+        function saveMeeting() {
+            const meeting = {
+                id: Date.now(),
+                name: document.getElementById('m-name').value,
+                org: document.getElementById('m-org').value,
+                email: document.getElementById('m-email').value,
+                time: document.getElementById('m-time').value,
+                location: document.getElementById('m-location').value,
+                type: document.getElementById('m-type').value,
+                notes: document.getElementById('m-notes').value,
+                opportunity: document.getElementById('m-opp').value,
+                actions: document.getElementById('m-actions').value,
+                tags: Array.from(document.querySelectorAll('#meeting-modal .tag.selected')).map(t => t.textContent),
+                created: new Date().toISOString()
+            };
+            
+            if (!meeting.name || !meeting.time) {
+                alert('Name and time are required');
+                return;
+            }
+            
+            meetings.push(meeting);
+            meetings.sort((a,b) => new Date(a.time) - new Date(b.time));
+            localStorage.setItem('dubai_meetings', JSON.stringify(meetings));
+            
+            // Auto-create task for next actions if specified
+            if (meeting.actions) {
+                const task = {
+                    id: Date.now() + 1,
+                    title: `Follow-up: ${meeting.actions.substring(0, 50)}${meeting.actions.length > 50 ? '...' : ''}`,
+                    meetingId: meeting.id,
+                    priority: 'high',
+                    category: 'followup',
+                    due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    notes: `From meeting with ${meeting.name}: ${meeting.actions}`,
+                    completed: false,
+                    created: new Date().toISOString()
+                };
+                tasks.push(task);
+                localStorage.setItem('dubai_tasks', JSON.stringify(tasks));
+                renderTasks();
+            }
+            
+            document.querySelectorAll('#meeting-modal input, #meeting-modal textarea').forEach(i => i.value = '');
+            document.querySelectorAll('#meeting-modal .tag').forEach(t => t.classList.remove('selected'));
+            closeModal('meeting-modal');
+            renderMeetings();
+            updateStats();
+            populateMeetingSelect();
+        }
+        
+        function populateMeetingSelect() {
+            const select = document.getElementById('t-meeting');
+            select.innerHTML = '<option value="">-- Standalone Task --</option>' + 
+                meetings.map(m => `<option value="${m.id}">${m.name} (${m.org || 'No org'})</option>`).join('');
+        }
+        
+        function renderMeetings() {
+            const list = document.getElementById('meetings-list');
+            const upcoming = document.getElementById('upcoming-list');
+            
+            if (meetings.length === 0) return;
+            
+            const html = meetings.map(m => {
+                const date = new Date(m.time);
+                const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'Asia/Dubai' });
+                const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' });
+                
+                return `
+                    <div class="meeting-item" onclick="viewMeeting(${m.id})">
+                        <div class="meeting-time">${dateStr} at ${timeStr}</div>
+                        <div class="meeting-title">${m.name} ${m.org ? `— ${m.org}` : ''}</div>
+                        <div class="meeting-contact">${m.type} ${m.location ? `• ${m.location}` : ''}</div>
+                        ${m.opportunity ? '<span style="color: var(--accent); font-size: 11px; margin-top: 4px; display: block;">💡 Opportunity noted</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            list.innerHTML = `<div class="card" style="padding: 0;">${html}</div>`;
+            
+            const future = meetings.filter(m => new Date(m.time) > new Date()).slice(0, 3);
+            if (future.length > 0) {
+                upcoming.innerHTML = future.map(m => {
+                    const date = new Date(m.time);
+                    return `
+                        <div class="meeting-item">
+                            <div class="meeting-time">${date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'Asia/Dubai' })}</div>
+                            <div class="meeting-title">${m.name}</div>
+                            <div class="meeting-contact">${m.org || ''}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Observation Management
+        function saveObservation() {
+            const obs = {
+                id: Date.now(),
+                category: document.getElementById('obs-category').value,
+                text: document.getElementById('obs-text').value,
+                context: document.getElementById('obs-context').value,
+                solution: document.getElementById('obs-solution').value,
+                created: new Date().toISOString()
+            };
+            
+            if (!obs.text) {
+                alert('Observation text is required');
+                return;
+            }
+            
+            observations.push(obs);
+            localStorage.setItem('dubai_observations', JSON.stringify(observations));
+            
+            document.querySelectorAll('#obs-modal input, #obs-modal textarea').forEach(i => i.value = '');
+            closeModal('obs-modal');
+            renderObservations();
+            updateStats();
+        }
+        
+        function renderObservations() {
+            const list = document.getElementById('obs-list');
+            if (observations.length === 0) return;
+            
+            const html = observations.map(o => {
+                const badge = o.category === 'pain' ? '<span class="badge pain">Pain Point</span>' : 
+                             o.category === 'opportunity' ? '<span class="badge opportunity">Opportunity</span>' : 
+                             '<span class="badge">Insight</span>';
+                
+                return `
+                    <div class="observation-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            ${badge}
+                            <span style="font-size: 11px; color: var(--text-2);">${new Date(o.created).toLocaleDateString('en-GB')}</span>
+                        </div>
+                        <div style="font-size: 15px; margin-bottom: 8px; line-height: 1.5;">${o.text}</div>
+                        ${o.context ? `<div style="font-size: 13px; color: var(--text-2); margin-bottom: 8px;">Context: ${o.context}</div>` : ''}
+                        ${o.solution ? `<div style="font-size: 13px; color: var(--accent);">💡 ${o.solution}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            list.innerHTML = `<div class="card" style="padding: 0;">${html}</div>`;
+        }
+        
+        function updateStats() {
+            const totalGoals = goals.length;
+            const totalCriteria = goals.reduce((acc, g) => acc + g.criteria.length, 0);
+            const completedCriteria = goals.reduce((acc, g) => acc + (g.completed ? g.completed.length : 0), 0);
+            const goalPct = totalCriteria > 0 ? Math.round((completedCriteria / totalCriteria) * 100) : 0;
+            
+            document.getElementById('goal-progress').textContent = goalPct + '%';
+            document.getElementById('open-tasks').textContent = tasks.filter(t => !t.completed).length;
+            document.getElementById('completed-tasks').textContent = tasks.filter(t => t.completed).length;
+        }
+        
+        function viewMeeting(id) {
+            const m = meetings.find(x => x.id === id);
+            if (!m) return;
+            
+            const date = new Date(m.time);
+            const details = `
+Meeting with ${m.name}
+${m.org}
+${date.toLocaleString('en-GB', { timeZone: 'Asia/Dubai' })}
+
+Type: ${m.type}
+Location: ${m.location || 'Not specified'}
+Email: ${m.email || 'Not recorded'}
+
+Discussion:
+${m.notes || 'No notes recorded'}
+
+Opportunity:
+${m.opportunity || 'None noted'}
+
+Next Actions:
+${m.actions || 'None specified'}
+
+Tags: ${m.tags.join(', ') || 'None'}
+            `;
+            
+            if (confirm(details + '\n\nSend follow-up email?')) {
+                generateEmail('followup', m);
+            }
+        }
+        
+        function generateEmail(type, meetingData = null) {
+            const templates = {
+                intro: {
+                    subject: 'Dubai Real Estate Tokenization Research - Meeting Request',
+                    body: `I am currently in Dubai conducting research on real estate tokenization infrastructure and investment opportunities. I would welcome the opportunity to meet with you to understand your perspective on the current regulatory and operational landscape.\n\nI am particularly interested in discussing:\n- Current bottlenecks in tokenization workflows\n- Custody and secondary market challenges\n- Regulatory coordination between VARA, DLD, and free zone authorities\n\nWould you be available for a brief meeting this week or next? I am flexible on location and timing.\n\nBest regards`
+                },
+                followup: {
+                    subject: 'Thank you - Dubai R&D Mission Follow-Up',
+                    body: `Thank you for taking the time to meet with me today. I found our discussion regarding [SPECIFIC TOPIC] particularly valuable.\n\nAs discussed, I am following up on:\n1. [ACTION ITEM]\n2. [ACTION ITEM]\n\nI will [YOUR COMMITMENT].\n\nI will be in Dubai until [DATE] and would welcome any further introductions or meetings you might suggest.\n\nBest regards`
+                },
+                request: {
+                    subject: 'Information Request - Dubai Property Tokenization',
+                    body: `Following our recent conversation, I am writing to request specific information regarding:\n\n[SPECIFIC DATA NEEDED]\n\nThis would greatly assist my analysis of market entry opportunities and potential partnership structures.\n\nI would appreciate any documentation or introductions you could provide.\n\nBest regards`
+                }
+            };
+            
+            const t = templates[type];
+            const subject = encodeURIComponent(t.subject);
+            const body = encodeURIComponent(t.body);
+            const email = meetingData ? meetingData.email : '';
+            
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        }
+        
+        function sendCustomEmail() {
+            const to = document.getElementById('custom-email').value;
+            const subject = encodeURIComponent(document.getElementById('custom-subject').value);
+            const body = encodeURIComponent(document.getElementById('custom-body').value);
+            
+            if (!to) {
+                alert('Please enter recipient email');
+                return;
+            }
+            
+            window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+        }
+        
+        function exportData() {
+            const data = {
+                export_date: new Date().toISOString(),
+                meetings: meetings,
+                observations: observations,
+                tasks: tasks,
+                goals: goals
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dubai-mission-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('Full mission data exported. Email this file to yourself as backup.');
+        }
+        
+        // Close modals on outside click
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', (e) => {
+                if (e.target === m) closeModal(m.id);
+            });
+        });
+    </script>
+</body>
+</html>
