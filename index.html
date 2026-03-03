@@ -24,6 +24,7 @@
             --border: #2a2a2a;
             --danger: #ff4444;
             --warning: #ffaa00;
+            --google: #4285f4;
         }
         
         body {
@@ -238,6 +239,11 @@
         
         .btn.danger {
             background: var(--danger);
+            color: white;
+        }
+        
+        .btn.google {
+            background: var(--google);
             color: white;
         }
         
@@ -657,6 +663,41 @@
             margin-top: 8px;
             font-style: italic;
         }
+        
+        .meeting-detail-view {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .detail-row {
+            margin-bottom: 12px;
+        }
+        
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        
+        .action-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .action-bar .btn {
+            flex: 1;
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
@@ -822,6 +863,25 @@
                 <textarea id="custom-body" placeholder="Enter your message..."></textarea>
             </div>
             <button class="btn" onclick="sendCustomEmail()">Open Email App</button>
+        </div>
+    </div>
+    
+    <div id="meeting-view-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Meeting Details</h2>
+                <button class="close-btn" onclick="closeModal('meeting-view-modal')">×</button>
+            </div>
+            
+            <div id="meeting-detail-content" class="meeting-detail-view">
+                <!-- Populated dynamically -->
+            </div>
+            
+            <div class="action-bar">
+                <button class="btn google" onclick="addToGoogleCalendar()">📅 Add to Google Calendar</button>
+                <button class="btn secondary" onclick="editCurrentMeeting()">✎ Edit</button>
+            </div>
+            <button class="btn danger" onclick="deleteCurrentMeeting()" style="margin-top: 8px;">Delete Meeting</button>
         </div>
     </div>
     
@@ -1065,6 +1125,7 @@
         
         let editingId = null;
         let editingType = null;
+        let currentViewingMeeting = null;
         
         const defaultGoals = [
             {
@@ -1197,6 +1258,32 @@
             };
             
             recognition.start();
+        }
+        
+        // Google Calendar Integration
+        function addToGoogleCalendar() {
+            if (!currentViewingMeeting) return;
+            
+            const m = currentViewingMeeting;
+            const startDate = new Date(m.time);
+            const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour default
+            
+            const formatDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            
+            const params = new URLSearchParams({
+                action: 'TEMPLATE',
+                text: `Meeting: ${m.name}${m.org ? ' (' + m.org + ')' : ''}`,
+                dates: `${formatDate(startDate)}/${formatDate(endDate)}`,
+                details: `Type: ${m.type}\n\nNotes: ${m.notes || 'None'}\n\nOpportunity: ${m.opportunity || 'None'}\n\nNext Actions: ${m.actions || 'None'}`,
+                location: m.location || '',
+            });
+            
+            if (m.email) {
+                params.append('add', m.email);
+            }
+            
+            const url = `https://calendar.google.com/calendar/render?${params.toString()}`;
+            window.open(url, '_blank');
         }
         
         // Task Functions
@@ -1455,7 +1542,7 @@
             modal.innerHTML = `
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2>${goal.title}</h2>
+                        <h2>${goal.title}</hh2>
                         <button class="close-btn" onclick="this.closest('.modal').remove()">×</button>
                     </div>
                     <p style="color: var(--text-2); margin-bottom: 16px;">Check off completed criteria:</p>
@@ -1612,7 +1699,7 @@
                 const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' });
                 
                 return `
-                    <div class="meeting-item" onclick="viewMeeting(${m.id})">
+                    <div class="meeting-item" onclick="viewMeetingDetail(${m.id})">
                         <div class="meeting-time">${dateStr} at ${timeStr}</div>
                         <div class="meeting-title">${m.name} ${m.org ? `— ${m.org}` : ''}</div>
                         <div class="meeting-contact">${m.type} ${m.location ? `• ${m.location}` : ''}</div>
@@ -1646,6 +1733,80 @@
                     </div>
                 `;
             }
+        }
+        
+        function viewMeetingDetail(id) {
+            const m = meetings.find(x => x.id === id);
+            if (!m) return;
+            
+            currentViewingMeeting = m;
+            
+            const date = new Date(m.time);
+            const content = document.getElementById('meeting-detail-content');
+            
+            content.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">Contact</div>
+                    <div class="detail-value">${m.name}${m.org ? ' — ' + m.org : ''}</div>
+                </div>
+                ${m.email ? `
+                <div class="detail-row">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">${m.email}</div>
+                </div>` : ''}
+                <div class="detail-row">
+                    <div class="detail-label">Date & Time</div>
+                    <div class="detail-value">${date.toLocaleString('en-GB', { timeZone: 'Asia/Dubai' })}</div>
+                </div>
+                ${m.location ? `
+                <div class="detail-row">
+                    <div class="detail-label">Location</div>
+                    <div class="detail-value">${m.location}</div>
+                </div>` : ''}
+                <div class="detail-row">
+                    <div class="detail-label">Type</div>
+                    <div class="detail-value">${m.type}</div>
+                </div>
+                ${m.notes ? `
+                <div class="detail-row">
+                    <div class="detail-label">Discussion Notes</div>
+                    <div class="detail-value" style="white-space: pre-wrap;">${m.notes}</div>
+                </div>` : ''}
+                ${m.opportunity ? `
+                <div class="detail-row">
+                    <div class="detail-label">Opportunity Identified</div>
+                    <div class="detail-value" style="color: var(--accent);">${m.opportunity}</div>
+                </div>` : ''}
+                ${m.actions ? `
+                <div class="detail-row">
+                    <div class="detail-label">Next Actions</div>
+                    <div class="detail-value">${m.actions}</div>
+                </div>` : ''}
+                ${m.tags && m.tags.length ? `
+                <div class="detail-row">
+                    <div class="detail-label">Tags</div>
+                    <div class="detail-value">${m.tags.join(', ')}</div>
+                </div>` : ''}
+            `;
+            
+            openModal('meeting-view-modal');
+        }
+        
+        function editCurrentMeeting() {
+            closeModal('meeting-view-modal');
+            openModal('meeting-modal', currentViewingMeeting.id);
+        }
+        
+        function deleteCurrentMeeting() {
+            if (!currentViewingMeeting) return;
+            if (!confirm('Delete this meeting?')) return;
+            
+            meetings = meetings.filter(m => m.id != currentViewingMeeting.id);
+            localStorage.setItem('dubai_meetings', JSON.stringify(meetings));
+            closeModal('meeting-view-modal');
+            renderMeetings();
+            updateStats();
+            populateMeetingSelect();
         }
         
         // Observation Functions
@@ -1754,37 +1915,6 @@
             document.getElementById('goal-progress').textContent = goalPct + '%';
             document.getElementById('open-tasks').textContent = tasks.filter(t => !t.completed).length;
             document.getElementById('completed-tasks').textContent = tasks.filter(t => t.completed).length;
-        }
-        
-        function viewMeeting(id) {
-            const m = meetings.find(x => x.id === id);
-            if (!m) return;
-            
-            const date = new Date(m.time);
-            const details = `
-Meeting with ${m.name}
-${m.org}
-${date.toLocaleString('en-GB', { timeZone: 'Asia/Dubai' })}
-
-Type: ${m.type}
-Location: ${m.location || 'Not specified'}
-Email: ${m.email || 'Not recorded'}
-
-Discussion:
-${m.notes || 'No notes recorded'}
-
-Opportunity:
-${m.opportunity || 'None noted'}
-
-Next Actions:
-${m.actions || 'None specified'}
-
-Tags: ${m.tags.join(', ') || 'None'}
-            `;
-            
-            if (confirm(details + '\n\nSend follow-up email?')) {
-                generateEmail('followup', m);
-            }
         }
         
         function generateEmail(type, meetingData = null) {
